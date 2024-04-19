@@ -1,4 +1,4 @@
-# Java Spring microservice starter kit
+# Inventory Application Service
 
 This repo provides a starting point for creating Java microservice applications running on [Spring](https://spring.io/).
 It contains a simple Hello World application as an example of how to get started, as well as a number of standard features.
