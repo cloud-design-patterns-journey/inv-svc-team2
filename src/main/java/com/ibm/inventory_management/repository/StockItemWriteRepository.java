@@ -8,7 +8,6 @@ import static java.util.Arrays.asList;
 
 import com.ibm.inventory_management.models.StockItem;
 import lombok.Getter;
-import lombok.Setter;
 
 public class StockItemWriteRepository {
 
@@ -19,10 +18,11 @@ public class StockItemWriteRepository {
         return stockItemWrite;
     }
 
-    @Getter
     private final Object lock = new Object();
+    public Object getLock() {
+        return lock;
+    }
 
-    @Setter
     private int id = 0;
     public List<StockItem> stockItems = new ArrayList<>(asList(
             new StockItem(++id + "")
@@ -69,6 +69,10 @@ public class StockItemWriteRepository {
     public int incrementId() {
         this.setId(++id);
         return this.id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void deleteStockItem(String id) {

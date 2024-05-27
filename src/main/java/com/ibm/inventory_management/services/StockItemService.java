@@ -11,10 +11,9 @@ import com.ibm.inventory_management.repository.StockItemWriteRepository;
 
 @Service
 public class StockItemService implements StockItemApi {
-    @Autowired
-    private StockItemReadRepository stockItemReadRepository;
-    @Autowired
-    private StockItemWriteRepository stockItemWriteRepository;
+
+    private final StockItemReadRepository stockItemReadRepository = StockItemReadRepository.get();
+    private final StockItemWriteRepository stockItemWriteRepository = StockItemWriteRepository.getStockItemsWrite();
 
     @Override
     public List<StockItem> listStockItems() {

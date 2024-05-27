@@ -8,6 +8,13 @@ import com.ibm.inventory_management.models.StockItem;
 
 public class StockItemReadRepository {
 
+    private static StockItemReadRepository instance;
+    public static StockItemReadRepository get() {
+        if (instance == null)
+            instance = new StockItemReadRepository();
+        return instance;
+    }
+
     public List<StockItem> stockItems = new ArrayList<>(StockItemWriteRepository.getStockItemsWrite().stockItems);
     private final Object lock = new Object();
 
