@@ -23,6 +23,8 @@ dependencies {
     // openapi
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
 
+    implementation 'com.bucket4j:bucket4j-core:8.1.0'
+
     // intellij
     compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
