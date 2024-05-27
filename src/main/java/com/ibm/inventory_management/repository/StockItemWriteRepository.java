@@ -7,15 +7,22 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 import com.ibm.inventory_management.models.StockItem;
+import lombok.Getter;
+import lombok.Setter;
 
 public class StockItemWriteRepository {
+
     private static StockItemWriteRepository stockItemWrite;
     public static StockItemWriteRepository getStockItemsWrite() {
-        if (stockItemWrite == null) {
+        if (stockItemWrite == null)
             stockItemWrite = new StockItemWriteRepository();
-        }
         return stockItemWrite;
     }
+
+    @Getter
+    private final Object lock = new Object();
+
+    @Setter
     private int id = 0;
     public List<StockItem> stockItems = new ArrayList<>(asList(
             new StockItem(++id + "")
@@ -36,23 +43,26 @@ public class StockItemWriteRepository {
 
     
     public void add(StockItem stockItem) {
-        stockItems.add(stockItem);
+        synchronized (lock) {
+            stockItems.add(stockItem);
+        }
     }
 
-
     public void updateStockItem(String id, String name, String manufacturer, Double price, int stock) {
-        StockItem itemToUpdate = this.stockItems.stream().filter(stockItem -> stockItem.getId().equals(id)).findFirst()
-        .orElse(null);
+        synchronized (lock) {
+            StockItem itemToUpdate = this.stockItems.stream().filter(stockItem -> stockItem.getId().equals(id)).findFirst()
+                    .orElse(null);
 
-        if (itemToUpdate == null) {
-            System.out.println("Item not found");
-            return;
+            if (itemToUpdate == null) {
+                System.out.println("Item not found");
+                return;
+            }
+
+            itemToUpdate.setName(name != null ? name : itemToUpdate.getName());
+            itemToUpdate.setManufacturer(manufacturer != null ? manufacturer : itemToUpdate.getManufacturer());
+            itemToUpdate.setPrice(Double.valueOf(price) != null ? price : itemToUpdate.getPrice());
+            itemToUpdate.setStock(Integer.valueOf(stock) != null ? stock : itemToUpdate.getStock());
         }
-
-        itemToUpdate.setName(name != null ? name : itemToUpdate.getName());
-        itemToUpdate.setManufacturer(manufacturer != null ? manufacturer : itemToUpdate.getManufacturer());
-        itemToUpdate.setPrice(Double.valueOf(price) != null ? price : itemToUpdate.getPrice());
-        itemToUpdate.setStock(Integer.valueOf(stock) != null ? stock : itemToUpdate.getStock());
     }
 
 
@@ -61,12 +71,10 @@ public class StockItemWriteRepository {
         return this.id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public void deleteStockItem(String id) {
-        this.stockItems = this.stockItems.stream().filter((stockItem) -> !stockItem.getId().equals(id))
-                .collect(Collectors.toList());
+        synchronized (lock) {
+            this.stockItems = this.stockItems.stream().filter((stockItem) -> !stockItem.getId().equals(id))
+                    .collect(Collectors.toList());
+        }
     }
 }
