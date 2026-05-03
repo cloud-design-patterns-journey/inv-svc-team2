@@ -132,3 +132,4 @@ commands for development:
 A Dockerfile is provided to build a container image for running the application. The container image definition
 contains default ARG values used for labels in the built container image. The values can be updated in the Dockerfile
 and/or provided at build time by using the `--build-arg` flag.
+\n
