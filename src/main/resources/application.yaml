@@ -1,7 +1,19 @@
 server:
   port: "${PORT:8080}"
 
+# Cache-Aside pattern (L4): Caffeine cache with 30s TTL — serves reads from memory,
+# invalidated on every stock write to avoid stale data during peak match traffic
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=30s
+
 openapi:
   id: "${API_ID:hello-watson}"
   title: "${API_TITLE:Hello Watson}"
   description: "${API_DESCRIPTION:Simple Hello World API}"
+
+logging:
+  level:
+    org.springframework.cache: TRACE
