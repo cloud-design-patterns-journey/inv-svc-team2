@@ -5,6 +5,7 @@ import java.time.Instant;
 public class StockEvent {
     private String id;
     private StockEventType eventType;
+    private StockEventPriority priority = StockEventPriority.NORMAL;
     private String itemId;
     private String itemName;
     private int previousStock;
@@ -23,6 +24,10 @@ public class StockEvent {
     public StockEventType getEventType() { return eventType; }
     public void setEventType(StockEventType eventType) { this.eventType = eventType; }
     public StockEvent withEventType(StockEventType eventType) { this.eventType = eventType; return this; }
+
+    public StockEventPriority getPriority() { return priority; }
+    public void setPriority(StockEventPriority priority) { this.priority = priority; }
+    public StockEvent withPriority(StockEventPriority priority) { this.priority = priority; return this; }
 
     public String getItemId() { return itemId; }
     public void setItemId(String itemId) { this.itemId = itemId; }
