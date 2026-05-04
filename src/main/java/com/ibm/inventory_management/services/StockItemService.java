@@ -14,6 +14,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.ibm.inventory_management.models.StockEvent;
+import com.ibm.inventory_management.models.StockEventPriority;
 import com.ibm.inventory_management.models.StockEventType;
 import com.ibm.inventory_management.models.StockItem;
 
@@ -61,6 +62,7 @@ public class StockItemService implements StockItemApi {
         eventStore.append(new StockEvent()
                 .withId(UUID.randomUUID().toString())
                 .withEventType(StockEventType.STOCK_CREATED)
+                .withPriority(resolvePriority(name, manufacturer))
                 .withItemId(newId)
                 .withItemName(name)
                 .withPreviousStock(0)
@@ -93,6 +95,7 @@ public class StockItemService implements StockItemApi {
         eventStore.append(new StockEvent()
                 .withId(UUID.randomUUID().toString())
                 .withEventType(StockEventType.STOCK_UPDATED)
+                .withPriority(resolvePriority(itemToUpdate.getName(), itemToUpdate.getManufacturer()))
                 .withItemId(id)
                 .withItemName(itemToUpdate.getName())
                 .withPreviousStock(previousStock)
@@ -118,6 +121,7 @@ public class StockItemService implements StockItemApi {
             eventStore.append(new StockEvent()
                     .withId(UUID.randomUUID().toString())
                     .withEventType(StockEventType.STOCK_DELETED)
+                    .withPriority(resolvePriority(itemToDelete.getName(), itemToDelete.getManufacturer()))
                     .withItemId(id)
                     .withItemName(itemToDelete.getName())
                     .withPreviousStock(itemToDelete.getStock())
@@ -125,5 +129,25 @@ public class StockItemService implements StockItemApi {
                     .withTimestamp(Instant.now())
                     .withPerformedBy("system"));
         }
+    }
+
+    private StockEventPriority resolvePriority(String itemName, String manufacturer) {
+        String searchableText = ((itemName != null ? itemName : "") + " " + (manufacturer != null ? manufacturer : ""))
+                .toLowerCase();
+
+        if (searchableText.contains("medical")
+                || searchableText.contains("urgence")
+                || searchableText.contains("pharma")
+                || searchableText.contains("safety")) {
+            return StockEventPriority.CRITICAL;
+        }
+
+        if (searchableText.contains("resto")
+                || searchableText.contains("food")
+                || searchableText.contains("logistic")) {
+            return StockEventPriority.HIGH;
+        }
+
+        return StockEventPriority.NORMAL;
     }
 }
