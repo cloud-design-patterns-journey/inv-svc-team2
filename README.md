@@ -135,3 +135,4 @@ and/or provided at build time by using the `--build-arg` flag.
 \n
 \n
 test 2 pipeline
+test 3 pipeline
