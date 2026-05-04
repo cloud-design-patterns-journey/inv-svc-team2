@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.ibm.inventory_management.models.StockEvent;
+import com.ibm.inventory_management.models.StockEventPriority;
 import com.ibm.inventory_management.models.StockEventType;
 
 @DisplayName("EventStore")
@@ -45,10 +46,24 @@ public class EventStoreTest {
     class GivenEventsAppended {
 
         @Test
-        @DisplayName("When getAll is called then it returns all events in order")
-        public void returns_all_events() {
-            StockEvent e1 = newEvent("1", StockEventType.STOCK_CREATED);
-            StockEvent e2 = newEvent("2", StockEventType.STOCK_UPDATED);
+        @DisplayName("When getAll is called then it returns higher priority events first")
+        public void returns_events_in_priority_order() {
+            StockEvent normalEvent = newEvent("1", StockEventType.STOCK_CREATED, StockEventPriority.NORMAL);
+            StockEvent criticalEvent = newEvent("2", StockEventType.STOCK_UPDATED, StockEventPriority.CRITICAL);
+            eventStore.append(normalEvent);
+            eventStore.append(criticalEvent);
+
+            List<StockEvent> result = eventStore.getAll();
+            assertEquals(2, result.size());
+            assertEquals(StockEventPriority.CRITICAL, result.get(0).getPriority());
+            assertEquals(StockEventPriority.NORMAL, result.get(1).getPriority());
+        }
+
+        @Test
+        @DisplayName("When getAll is called then events with the same priority keep their insertion order")
+        public void keeps_insertion_order_for_same_priority() {
+            StockEvent e1 = newEvent("1", StockEventType.STOCK_CREATED, StockEventPriority.NORMAL);
+            StockEvent e2 = newEvent("2", StockEventType.STOCK_UPDATED, StockEventPriority.NORMAL);
             eventStore.append(e1);
             eventStore.append(e2);
 
@@ -61,9 +76,9 @@ public class EventStoreTest {
         @Test
         @DisplayName("When getByItemId is called then it returns only events for that item")
         public void filters_by_item_id() {
-            eventStore.append(newEvent("item-1", StockEventType.STOCK_CREATED));
-            eventStore.append(newEvent("item-2", StockEventType.STOCK_UPDATED));
-            eventStore.append(newEvent("item-1", StockEventType.STOCK_UPDATED));
+            eventStore.append(newEvent("item-1", StockEventType.STOCK_CREATED, StockEventPriority.NORMAL));
+            eventStore.append(newEvent("item-2", StockEventType.STOCK_UPDATED, StockEventPriority.CRITICAL));
+            eventStore.append(newEvent("item-1", StockEventType.STOCK_UPDATED, StockEventPriority.HIGH));
 
             List<StockEvent> result = eventStore.getByItemId("item-1");
             assertEquals(2, result.size());
@@ -73,7 +88,7 @@ public class EventStoreTest {
         @Test
         @DisplayName("When appended, the original list is not mutated (immutability)")
         public void get_all_returns_defensive_copy() {
-            eventStore.append(newEvent("1", StockEventType.STOCK_CREATED));
+            eventStore.append(newEvent("1", StockEventType.STOCK_CREATED, StockEventPriority.NORMAL));
             List<StockEvent> result = eventStore.getAll();
             result.clear();
 
@@ -81,10 +96,11 @@ public class EventStoreTest {
         }
     }
 
-    private StockEvent newEvent(String itemId, StockEventType type) {
+    private StockEvent newEvent(String itemId, StockEventType type, StockEventPriority priority) {
         return new StockEvent()
                 .withId(UUID.randomUUID().toString())
                 .withEventType(type)
+                .withPriority(priority)
                 .withItemId(itemId)
                 .withItemName("Test Item")
                 .withPreviousStock(10)

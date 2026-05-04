@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.ibm.inventory_management.models.StockEvent;
+import com.ibm.inventory_management.models.StockEventPriority;
 import com.ibm.inventory_management.models.StockEventType;
 import com.ibm.inventory_management.models.StockItem;
 import com.ibm.inventory_management.models.StockItemAuditEntry;
@@ -139,6 +140,7 @@ public class StockItemService implements StockItemApi {
             eventStore.append(new StockEvent()
                     .withId(UUID.randomUUID().toString())
                     .withEventType(StockEventType.STOCK_DELETED)
+                    .withPriority(resolvePriority(itemToDelete.getName(), itemToDelete.getManufacturer()))
                     .withItemId(id)
                     .withItemName(removedItem.getName())
                     .withPreviousStock(removedItem.getStock())
@@ -215,5 +217,25 @@ public class StockItemService implements StockItemApi {
         } catch (NumberFormatException ex) {
             return Long.MAX_VALUE;
         }
+    }
+
+    private StockEventPriority resolvePriority(String itemName, String manufacturer) {
+        String searchableText = ((itemName != null ? itemName : "") + " " + (manufacturer != null ? manufacturer : ""))
+                .toLowerCase();
+
+        if (searchableText.contains("medical")
+                || searchableText.contains("urgence")
+                || searchableText.contains("pharma")
+                || searchableText.contains("safety")) {
+            return StockEventPriority.CRITICAL;
+        }
+
+        if (searchableText.contains("resto")
+                || searchableText.contains("food")
+                || searchableText.contains("logistic")) {
+            return StockEventPriority.HIGH;
+        }
+
+        return StockEventPriority.NORMAL;
     }
 }
