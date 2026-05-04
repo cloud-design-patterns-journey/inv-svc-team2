@@ -24,7 +24,7 @@ public class Application extends SpringBootServletInitializer {
     }
 
     @Bean
-    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+    public CommandLineRunner commandLineRunner() {
         return args -> {
             String port = environment.getProperty("local.server.port");
 

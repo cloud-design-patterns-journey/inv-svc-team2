@@ -8,6 +8,18 @@ spring:
     type: caffeine
     caffeine:
       spec: maximumSize=500,expireAfterWrite=30s
+  application:
+    name: inventory-management-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
 
 openapi:
   id: "${API_ID:hello-watson}"
