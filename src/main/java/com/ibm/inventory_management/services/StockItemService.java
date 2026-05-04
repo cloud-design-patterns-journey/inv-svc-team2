@@ -140,7 +140,7 @@ public class StockItemService implements StockItemApi {
             eventStore.append(new StockEvent()
                     .withId(UUID.randomUUID().toString())
                     .withEventType(StockEventType.STOCK_DELETED)
-                    .withPriority(resolvePriority(itemToDelete.getName(), itemToDelete.getManufacturer()))
+                    .withPriority(resolvePriority(removedItem.getName(), removedItem.getManufacturer()))
                     .withItemId(id)
                     .withItemName(removedItem.getName())
                     .withPreviousStock(removedItem.getStock())
@@ -207,9 +207,9 @@ public class StockItemService implements StockItemApi {
             return List.of();
         }
         return authentication.getAuthorities().stream()
-                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
                 .sorted()
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
     private long parseId(String id) {
         try {
